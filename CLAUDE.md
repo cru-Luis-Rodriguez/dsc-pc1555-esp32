@@ -32,11 +32,21 @@ been tested and ruled out.
 
 ## Current state
 
-**The panel is electrically healthy but not functioning.**
+**The panel powers up but does not clock the Keybus.**
 
-Measured at the panel: `RED`–`BLK` **13.6 V**, `YEL`–`BLK` **3.95 V** steady (~29%
-duty, clock running), `GRN`–`BLK` **6.15 V** (~45% duty, data flowing). Identical
-readings at both keypads, so the house wiring is good.
+Measured at the panel: `RED`–`BLK` **13.6 V** (supply good), `YEL`–`BLK` **3.95 V**
+steady, `GRN`–`BLK` **6.15 V** steady. Identical at both keypads, so house wiring is
+good.
+
+> **Those two voltages are static DC, not duty-cycle averages.** An earlier reading of
+> this project treated an intermediate DMM voltage as proof the line was switching. It
+> is not — a multimeter cannot distinguish a square wave from a parked level. The
+> `probe` target settles it: **0 edges/s on both GPIO 18 and 19** across four captures,
+> while the same GPIO 18 counted **214,552 transitions when left floating**. The pin
+> detects edges; the Keybus lines do not produce any.
+
+So Stage 4 ("is the CPU running?") is a **FAIL**, not the pass recorded earlier. The
+power supply works and nothing drives the bus.
 
 But both keypads show **Trouble lit, Ready off, zero zone LEDs, and accept no
 keystrokes**, with a ~1 Hz beep that `[#]` will not silence. Ready off with no zone

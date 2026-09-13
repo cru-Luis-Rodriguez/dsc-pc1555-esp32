@@ -406,15 +406,39 @@ well and is often easier to reach.
 > number. Steadiness tells you the switching is regular, not that it's absent. What
 > matters is **where the reading sits**, not whether it holds still.
 
-| Reading | Meaning |
-|---|---|
-| Steady at the rail (~13.6 V, same as `RED`–`BLK`) | Line parked high, not switching — **consistent with a halted CPU** |
-| Steady at ~0 V | Line stuck low — fault |
-| **Steady at an intermediate value** (say 2–10 V) | **Line is switching at a constant duty cycle — the panel is clocking** ✅ |
-| Wobbling or drifting | Switching with a varying duty cycle — also clocking |
+> ## ⚠️ This section was wrong. Read this before trusting any voltage below.
+>
+> An earlier version said: *"steady at an intermediate value → the line is switching
+> at constant duty → the panel is clocking ✅"*. **That is not sound, and it misdirected
+> this entire diagnosis.**
+>
+> A multimeter integrates. A steady intermediate reading is equally consistent with:
+>
+> 1. a square wave at constant duty cycle (line switching), **or**
+> 2. a line simply parked at that DC level (not switching at all)
+>
+> **A DMM cannot distinguish these.** Nothing about an intermediate reading implies
+> motion. Asserting otherwise produced a false "CPU running" pass at Stage 4 and cost
+> an evening.
+>
+> **To decide it you need an edge counter, not a voltmeter.** Flash `-e probe`
+> (`src/pin_probe.cpp`) and read edges/s. That is the only instrument here that
+> answers the question.
 
-A halted processor parks a digital output *at* a rail. Any reading meaningfully away
-from both rails means the line is toggling.
+| Reading | What it rules out | What it does NOT tell you |
+|---|---|---|
+| Steady at the rail (~13.6 V) | — | Whether the line switches |
+| Steady at ~0 V | — | Whether the line switches |
+| Steady at an intermediate value | Neither rail is stuck | **Nothing about switching** |
+| Visibly wobbling | — | Duty cycle is at least varying |
+
+Use the voltage only to confirm the divider ratio is sane and signal is present.
+**Use `pio run -e probe` to decide whether the line is alive.**
+
+**Measured on this panel:** `YEL` 3.95 V, `GRN` 6.15 V, both steady — and the edge
+counter reports **0 edges/s on both pins** across four captures, while the same GPIO 18
+counted 214,552 transitions when left floating. The pin works; the line does not move.
+Those voltages are **static DC levels, not duty-cycle averages.**
 
 **Measured on this panel:**
 
