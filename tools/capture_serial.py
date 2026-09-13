@@ -6,22 +6,34 @@ Why this exists:
   - `pio device monitor` requires a tty. Redirect its output and it dies with
     termios.error: (102, 'Operation not supported on socket'), so it cannot be
     used to capture output from a script or an agent session.
-  - macOS has no `timeout` (that's GNU coreutils). `gtimeout` only exists if
-    someone installed coreutils via brew.
+  - macOS has no `timeout` (that's GNU coreutils).
 
 Usage:
-    python3 tools/capture_serial.py [port] [baud] [seconds] [outfile]
+    python3 tools/capture_serial.py [--reset] [port] [baud] [seconds] [outfile]
 
 Defaults: /dev/cu.usbserial-0001 115200 30 serial-capture.log
 
-Needs pyserial. PlatformIO already bundles it, so the reliable invocation is:
+    --reset   Pulse the board's reset line before capturing, so the boot banner
+              lands inside the window. Use this when you need to prove the board
+              is actually running.
 
-    ~/.platformio/penv/bin/python tools/capture_serial.py
+Needs pyserial. PlatformIO bundles it, so the reliable invocation is:
 
-Use that path rather than a Homebrew Cellar path — the Cellar path contains the
+    ~/.platformio/penv/bin/python tools/capture_serial.py --reset
+
+Use that path, not a Homebrew Cellar path — the Cellar path contains the
 PlatformIO version number and breaks on every upgrade.
 
-Output goes to both stdout and the file, so it works piped or redirected.
+DTR/RTS
+-------
+On ESP32 dev boards the USB-serial chip's DTR and RTS lines drive EN (reset)
+and GPIO0 (boot select) through the auto-reset transistors. pyserial asserts
+both by default when opening a port, which can leave the board **held in
+reset** — the port opens cleanly and you get zero bytes indefinitely.
+
+So this script explicitly deasserts both after opening. With --reset it then
+performs the standard sequence (RTS low = EN low, pause, release) to reboot the
+board into run mode, never into download mode.
 """
 
 import sys
@@ -39,8 +51,24 @@ except ImportError:
 DEFAULTS = ("/dev/cu.usbserial-0001", 115200, 30, "serial-capture.log")
 
 
+def pulse_reset(ser: "serial.Serial") -> None:
+    """Reboot an ESP32 into run mode via the auto-reset circuit.
+
+    RTS drives EN (reset), DTR drives GPIO0 (boot select). Holding GPIO0 high
+    while releasing EN gives a normal boot rather than download mode.
+    """
+    ser.dtr = False   # GPIO0 high -> normal boot, not download mode
+    ser.rts = True    # EN low     -> hold in reset
+    time.sleep(0.15)
+    ser.rts = False   # EN high    -> release, board boots
+    time.sleep(0.05)
+
+
 def main() -> int:
-    args = sys.argv[1:]
+    args = [a for a in sys.argv[1:] if not a.startswith("--")]
+    flags = {a for a in sys.argv[1:] if a.startswith("--")}
+    do_reset = "--reset" in flags
+
     port = args[0] if len(args) > 0 else DEFAULTS[0]
     baud = int(args[1]) if len(args) > 1 else DEFAULTS[1]
     seconds = float(args[2]) if len(args) > 2 else DEFAULTS[2]
@@ -50,6 +78,21 @@ def main() -> int:
         ser = serial.Serial(port, baud, timeout=0.2)
     except serial.SerialException as exc:
         sys.exit(f"could not open {port}: {exc}")
+
+    # Never leave the board held in reset. See the DTR/RTS note above.
+    try:
+        ser.dtr = False
+        ser.rts = False
+    except OSError as exc:
+        print(f"# warning: could not set DTR/RTS: {exc}", file=sys.stderr)
+
+    if do_reset:
+        print("# pulsing reset", file=sys.stderr, flush=True)
+        try:
+            pulse_reset(ser)
+        except OSError as exc:
+            print(f"# warning: reset pulse failed: {exc}", file=sys.stderr)
+        ser.reset_input_buffer()
 
     print(
         f"# capturing {seconds:g}s from {port} @ {baud} -> {outfile}",
@@ -75,8 +118,9 @@ def main() -> int:
 
     if total == 0:
         print(
-            "# zero bytes. Board not running, wrong port, or another process "
-            "holds the port (close any open serial monitor).",
+            "# zero bytes. If --reset was used and even the boot banner is "
+            "missing, the board is not running — suspect a short on EN or a "
+            "stray strand bridging pins, not the Keybus.",
             file=sys.stderr,
             flush=True,
         )
