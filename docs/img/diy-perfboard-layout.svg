@@ -1,0 +1,220 @@
+<svg viewBox="0 0 1180 760" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" role="img"
+     aria-label="Perfboard placement layout for the zone reader on an ELEGOO 7 by 9 centimeter perfboard. Six blue 2-position screw terminal blocks stack along the left edge: five zone loops and one 5 volt power input from the buck converter. Each zone row has a 1k resistor in the signal path with a 0.1 microfarad capacitor to the ground rail, a 5.6k pull-up to the 3.3 volt bus, and a 15k to the ground bus. The ESP32 DevKit mounts on the right; colored jumpers carry zone 1 to GPIO 32, zone 2 to GPIO 33, zone 3 to GPIO 34, zone 4 to GPIO 35 and zone 5 to GPIO 36. The 3.3 volt bus comes from the ESP32 3V3 pin, the 5 volt input goes to VIN, and one ground bus ties everything.">
+  <style>
+    .mono { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
+    .sans { font-family: -apple-system, "Segoe UI", Helvetica, Arial, sans-serif; }
+    .ink  { fill: #2b2f2e; }
+    .dim  { fill: #6d7a76; }
+    .wire { fill: none; stroke-linecap: round; stroke-linejoin: round; }
+  </style>
+
+  <defs>
+    <pattern id="holes" x="220" y="150" width="20" height="20" patternUnits="userSpaceOnUse">
+      <circle cx="10" cy="10" r="2.8" fill="#9a6a33"/>
+    </pattern>
+
+    <!-- 2-pos screw terminal block, origin = upper solder pin -->
+    <g id="tblock">
+      <rect x="-20" y="-16" width="42" height="72" rx="3" fill="#2f6db5" stroke="#1d4a80" stroke-width="1.5"/>
+      <circle cx="-6" cy="0"  r="6" fill="#cfd6dd" stroke="#5a6570" stroke-width="1.2"/>
+      <circle cx="-6" cy="40" r="6" fill="#cfd6dd" stroke="#5a6570" stroke-width="1.2"/>
+      <path d="M-9,-3 L-3,3 M-9,43 L-3,37" stroke="#5a6570" stroke-width="1.4"/>
+      <circle cx="0" cy="0"  r="2.2" fill="#333"/>
+      <circle cx="0" cy="40" r="2.2" fill="#333"/>
+    </g>
+
+    <!-- resistors, origin = left end of body, wire axis y=0 -->
+    <g id="r56k">
+      <rect x="0" y="-8" width="80" height="16" rx="7" fill="#e8d5a3" stroke="#8a6b3a" stroke-width="1"/>
+      <rect x="14" y="-8" width="8" height="16" fill="#2e8b57"/>
+      <rect x="30" y="-8" width="8" height="16" fill="#3465a4"/>
+      <rect x="46" y="-8" width="8" height="16" fill="#c0392b"/>
+      <rect x="62" y="-8" width="6" height="16" fill="#caa64a"/>
+    </g>
+    <g id="r1k">
+      <rect x="0" y="-8" width="80" height="16" rx="7" fill="#e8d5a3" stroke="#8a6b3a" stroke-width="1"/>
+      <rect x="14" y="-8" width="8" height="16" fill="#7b4a12"/>
+      <rect x="30" y="-8" width="8" height="16" fill="#1a1a1a"/>
+      <rect x="46" y="-8" width="8" height="16" fill="#c0392b"/>
+      <rect x="62" y="-8" width="6" height="16" fill="#caa64a"/>
+    </g>
+    <g id="r15k">
+      <rect x="0" y="-8" width="52" height="16" rx="7" fill="#e8d5a3" stroke="#8a6b3a" stroke-width="1"/>
+      <rect x="9"  y="-8" width="7" height="16" fill="#7b4a12"/>
+      <rect x="21" y="-8" width="7" height="16" fill="#2e8b57"/>
+      <rect x="33" y="-8" width="7" height="16" fill="#e08a2e"/>
+      <rect x="43" y="-8" width="5" height="16" fill="#caa64a"/>
+    </g>
+
+    <!-- one zone cell, origin = terminal block upper pin (col 2, row A) -->
+    <g id="zcell">
+      <!-- loop hot to node, loop return to GND bus -->
+      <path class="wire" d="M0,0 H120" stroke="#8d9491" stroke-width="2.5"/>
+      <path class="wire" d="M0,40 H60" stroke="#2b2f2e" stroke-width="2.5"/>
+      <!-- node column -->
+      <path class="wire" d="M120,0 V40" stroke="#8d9491" stroke-width="2.5"/>
+      <circle cx="120" cy="0" r="3.2" fill="#2b2f2e"/>
+      <circle cx="120" cy="20" r="3.2" fill="#2b2f2e"/>
+      <circle cx="120" cy="40" r="3.2" fill="#2b2f2e"/>
+      <!-- 1k in the signal path, then cap to the right ground rail -->
+      <path class="wire" d="M120,0 H130 M210,0 H360" stroke="#8d9491" stroke-width="2.5"/>
+      <use xlink:href="#r1k" x="130" y="0"/>
+      <circle cx="360" cy="0" r="3.2" fill="#2b2f2e"/>
+      <ellipse cx="360" cy="11" rx="8" ry="9" fill="#e6c34c" stroke="#a8842b" stroke-width="1.2"/>
+      <path class="wire" d="M360,20 H380" stroke="#2b2f2e" stroke-width="2.5"/>
+      <!-- 5.6k pull-up to the 3.3V bus -->
+      <path class="wire" d="M120,20 H130 M210,20 H300" stroke="#e08a2e" stroke-width="2.5"/>
+      <use xlink:href="#r56k" x="130" y="20"/>
+      <!-- 15k to the GND bus -->
+      <path class="wire" d="M116,40 H120 M60,40 H64" stroke="#2b2f2e" stroke-width="2.5"/>
+      <use xlink:href="#r15k" x="64" y="40"/>
+      <use xlink:href="#tblock" x="0" y="0"/>
+    </g>
+  </defs>
+
+  <rect x="0" y="0" width="1180" height="760" rx="8" fill="#f7f6f3" stroke="#d8d5cd"/>
+  <text x="24" y="34" class="sans ink" font-size="16" font-weight="700">Perfboard layout — zone reader, component side</text>
+  <text x="24" y="56" class="mono dim" font-size="10">ELEGOO 7×9 cm double-sided perfboard (2.54 mm grid) — terminal blocks land on every other hole (5.08 mm)</text>
+
+  <g transform="translate(150,0)">
+    <!-- board -->
+    <rect x="60" y="80" width="740" height="580" rx="10" fill="#d8a35f" stroke="#a3733a" stroke-width="2"/>
+    <rect x="70" y="90" width="720" height="560" fill="url(#holes)"/>
+
+    <!-- buses -->
+    <path class="wire" d="M160,150 V580" stroke="#2b2f2e" stroke-width="3"/>
+    <path class="wire" d="M160,580 H480" stroke="#2b2f2e" stroke-width="3"/>
+    <path class="wire" d="M480,140 V580" stroke="#2b2f2e" stroke-width="3"/>
+    <path class="wire" d="M520,400 H480" stroke="#2b2f2e" stroke-width="3"/>
+    <path class="wire" d="M520,140 H506 V128 H400 V460" stroke="#e08a2e" stroke-width="3"/>
+
+    <!-- zone signal jumpers to ADC1 pins -->
+    <path class="wire" d="M460,120 H474 V260 H520" stroke="#d9a400" stroke-width="3"/>
+    <path class="wire" d="M460,200 H482 V280 H520" stroke="#3465a4" stroke-width="3"/>
+    <path class="wire" d="M460,280 H466 V220 H520" stroke="#2e8b57" stroke-width="3"/>
+    <path class="wire" d="M460,360 H490 V240 H520" stroke="#8e44ad" stroke-width="3"/>
+    <path class="wire" d="M460,440 H498 V180 H520" stroke="#0a9396" stroke-width="3"/>
+
+    <!-- 5V in from buck to VIN -->
+    <path class="wire" d="M100,520 H508 V500 H520" stroke="#c0392b" stroke-width="3"/>
+    <path class="wire" d="M100,560 H160" stroke="#2b2f2e" stroke-width="3"/>
+
+    <!-- zone cells -->
+    <use xlink:href="#zcell" transform="translate(100,120)"/>
+    <use xlink:href="#zcell" transform="translate(100,200)"/>
+    <use xlink:href="#zcell" transform="translate(100,280)"/>
+    <use xlink:href="#zcell" transform="translate(100,360)"/>
+    <use xlink:href="#zcell" transform="translate(100,440)"/>
+
+    <!-- power terminal block -->
+    <use xlink:href="#tblock" x="100" y="520"/>
+
+    <!-- bus junction dots -->
+    <circle cx="160" cy="160" r="3.2" fill="#2b2f2e"/><circle cx="160" cy="240" r="3.2" fill="#2b2f2e"/>
+    <circle cx="160" cy="320" r="3.2" fill="#2b2f2e"/><circle cx="160" cy="400" r="3.2" fill="#2b2f2e"/>
+    <circle cx="160" cy="480" r="3.2" fill="#2b2f2e"/><circle cx="160" cy="560" r="3.2" fill="#2b2f2e"/>
+    <circle cx="400" cy="140" r="3.2" fill="#e08a2e"/><circle cx="400" cy="220" r="3.2" fill="#e08a2e"/>
+    <circle cx="400" cy="300" r="3.2" fill="#e08a2e"/><circle cx="400" cy="380" r="3.2" fill="#e08a2e"/>
+    <circle cx="400" cy="460" r="3.2" fill="#e08a2e"/>
+    <circle cx="480" cy="140" r="3.2" fill="#2b2f2e"/><circle cx="480" cy="220" r="3.2" fill="#2b2f2e"/>
+    <circle cx="480" cy="300" r="3.2" fill="#2b2f2e"/><circle cx="480" cy="380" r="3.2" fill="#2b2f2e"/>
+    <circle cx="480" cy="460" r="3.2" fill="#2b2f2e"/><circle cx="480" cy="400" r="3.2" fill="#2b2f2e"/>
+
+    <!-- ESP32 module -->
+    <rect x="506" y="118" width="230" height="402" rx="6" fill="#1d4d57" stroke="#0f2f36" stroke-width="2"/>
+    <rect x="618" y="130" width="100" height="100" rx="4" fill="#c6ccd2" stroke="#8a949c" stroke-width="1.5"/>
+    <text x="668" y="172" text-anchor="middle" class="mono" font-size="10" fill="#3a444c" font-weight="700">ESP32-</text>
+    <text x="668" y="186" text-anchor="middle" class="mono" font-size="10" fill="#3a444c" font-weight="700">WROOM-32</text>
+    <text x="660" y="360" text-anchor="middle" class="sans" font-size="13" font-weight="700" fill="#e8ecee">ESP32 DevKit</text>
+    <text x="660" y="378" text-anchor="middle" class="mono" font-size="9.5" fill="#9fb3ba">38-pin</text>
+    <text x="660" y="392" text-anchor="middle" class="mono" font-size="9.5" fill="#9fb3ba">on female headers</text>
+    <rect x="596" y="498" width="50" height="18" rx="3" fill="#c6ccd2" stroke="#8a949c"/>
+    <text x="621" y="540" text-anchor="middle" class="mono" font-size="9" fill="#9fb3ba">USB-C ↓</text>
+
+    <!-- left header pins -->
+    <g>
+      <circle cx="520" cy="140" r="3.4" fill="#e0c25a"/><text x="532" y="144" class="mono" font-size="10" font-weight="700" fill="#ffffff">3V3</text>
+      <circle cx="520" cy="160" r="3.4" fill="#5a747c"/><text x="532" y="164" class="mono" font-size="9" fill="#9fb3ba">EN</text>
+      <circle cx="520" cy="180" r="3.4" fill="#e0c25a"/><text x="532" y="184" class="mono" font-size="10" font-weight="700" fill="#ffffff">VP·36 — Z5</text>
+      <circle cx="520" cy="200" r="3.4" fill="#e0c25a"/><text x="532" y="204" class="mono" font-size="9" fill="#cfd9dd">VN·39 — spare</text>
+      <circle cx="520" cy="220" r="3.4" fill="#e0c25a"/><text x="532" y="224" class="mono" font-size="10" font-weight="700" fill="#ffffff">34 — Z3</text>
+      <circle cx="520" cy="240" r="3.4" fill="#e0c25a"/><text x="532" y="244" class="mono" font-size="10" font-weight="700" fill="#ffffff">35 — Z4</text>
+      <circle cx="520" cy="260" r="3.4" fill="#e0c25a"/><text x="532" y="264" class="mono" font-size="10" font-weight="700" fill="#ffffff">32 — Z1</text>
+      <circle cx="520" cy="280" r="3.4" fill="#e0c25a"/><text x="532" y="284" class="mono" font-size="10" font-weight="700" fill="#ffffff">33 — Z2</text>
+      <circle cx="520" cy="300" r="3.4" fill="#5a747c"/>
+      <circle cx="520" cy="320" r="3.4" fill="#5a747c"/><text x="532" y="324" class="mono" font-size="9" fill="#9fb3ba">26 — relay, ph. 2</text>
+      <circle cx="520" cy="340" r="3.4" fill="#5a747c"/>
+      <circle cx="520" cy="360" r="3.4" fill="#5a747c"/>
+      <circle cx="520" cy="380" r="3.4" fill="#5a747c"/>
+      <circle cx="520" cy="400" r="3.4" fill="#e0c25a"/><text x="532" y="404" class="mono" font-size="10" font-weight="700" fill="#ffffff">GND</text>
+      <circle cx="520" cy="420" r="3.4" fill="#5a747c"/>
+      <circle cx="520" cy="440" r="3.4" fill="#5a747c"/>
+      <circle cx="520" cy="460" r="3.4" fill="#5a747c"/>
+      <circle cx="520" cy="480" r="3.4" fill="#5a747c"/>
+      <circle cx="520" cy="500" r="3.4" fill="#e0c25a"/><text x="532" y="504" class="mono" font-size="10" font-weight="700" fill="#ffffff">VIN — 5 V</text>
+    </g>
+    <!-- right header pins, unused -->
+    <g fill="#5a747c">
+      <circle cx="720" cy="140" r="3.4"/><circle cx="720" cy="160" r="3.4"/><circle cx="720" cy="180" r="3.4"/>
+      <circle cx="720" cy="200" r="3.4"/><circle cx="720" cy="220" r="3.4"/><circle cx="720" cy="240" r="3.4"/>
+      <circle cx="720" cy="260" r="3.4"/><circle cx="720" cy="280" r="3.4"/><circle cx="720" cy="300" r="3.4"/>
+      <circle cx="720" cy="320" r="3.4"/><circle cx="720" cy="340" r="3.4"/><circle cx="720" cy="360" r="3.4"/>
+      <circle cx="720" cy="380" r="3.4"/><circle cx="720" cy="400" r="3.4"/><circle cx="720" cy="420" r="3.4"/>
+      <circle cx="720" cy="440" r="3.4"/><circle cx="720" cy="460" r="3.4"/><circle cx="720" cy="480" r="3.4"/>
+      <circle cx="720" cy="500" r="3.4"/>
+    </g>
+
+    <!-- zone labels -->
+    <text x="52" y="116" text-anchor="end" class="sans ink" font-size="11" font-weight="700">Z1</text>
+    <text x="52" y="130" text-anchor="end" class="mono dim" font-size="9">Front/Rear Door</text>
+    <text x="52" y="196" text-anchor="end" class="sans ink" font-size="11" font-weight="700">Z2</text>
+    <text x="52" y="210" text-anchor="end" class="mono dim" font-size="9">Master Bedroom</text>
+    <text x="52" y="276" text-anchor="end" class="sans ink" font-size="11" font-weight="700">Z3</text>
+    <text x="52" y="290" text-anchor="end" class="mono dim" font-size="9">2nd Floor</text>
+    <text x="52" y="356" text-anchor="end" class="sans ink" font-size="11" font-weight="700">Z4</text>
+    <text x="52" y="370" text-anchor="end" class="mono dim" font-size="9">Rear Windows</text>
+    <text x="52" y="436" text-anchor="end" class="sans ink" font-size="11" font-weight="700">Z5</text>
+    <text x="52" y="450" text-anchor="end" class="mono dim" font-size="9">Front Windows</text>
+    <text x="52" y="516" text-anchor="end" class="sans ink" font-size="11" font-weight="700">PWR</text>
+    <text x="52" y="530" text-anchor="end" class="mono dim" font-size="9">5.0 V from buck</text>
+    <text x="52" y="544" text-anchor="end" class="mono dim" font-size="9">(+ top, − bottom)</text>
+
+    <!-- bus labels -->
+    <text x="166" y="146" class="mono" font-size="9" font-weight="600" fill="#2b2f2e">GND bus</text>
+    <text x="356" y="122" class="mono" font-size="9" font-weight="600" fill="#e08a2e">3.3 V bus</text>
+    <text x="452" y="600" text-anchor="end" class="mono" font-size="9" font-weight="600" fill="#2b2f2e">GND rail (caps)</text>
+  </g>
+
+  <!-- legend -->
+  <g transform="translate(960,110)">
+    <text x="0" y="0" class="sans ink" font-size="12" font-weight="700">Legend</text>
+    <use xlink:href="#r56k" transform="translate(0,22) scale(0.8)"/>
+    <text x="72" y="26" class="mono ink" font-size="9.5">5.6 kΩ ×5</text>
+    <text x="72" y="38" class="mono dim" font-size="8.5">grn·blu·red·gld</text>
+    <use xlink:href="#r15k" transform="translate(0,58) scale(0.8)"/>
+    <text x="72" y="62" class="mono ink" font-size="9.5">15 kΩ ×5</text>
+    <text x="72" y="74" class="mono dim" font-size="8.5">brn·grn·org·gld</text>
+    <use xlink:href="#r1k" transform="translate(0,94) scale(0.8)"/>
+    <text x="72" y="98" class="mono ink" font-size="9.5">1 kΩ ×5</text>
+    <text x="72" y="110" class="mono dim" font-size="8.5">brn·blk·red·gld</text>
+    <ellipse cx="10" cy="134" rx="8" ry="9" fill="#e6c34c" stroke="#a8842b"/>
+    <text x="72" y="138" class="mono ink" font-size="9.5">0.1 µF ×5</text>
+    <rect x="0" y="156" width="22" height="30" rx="2" fill="#2f6db5" stroke="#1d4a80"/>
+    <text x="72" y="174" class="mono ink" font-size="9.5">2-pos block ×6</text>
+
+    <text x="0" y="216" class="sans ink" font-size="11" font-weight="700">Wires</text>
+    <path d="M0,228 H30" stroke="#d9a400" stroke-width="3"/><text x="38" y="232" class="mono dim" font-size="9">Z1 → GPIO 32</text>
+    <path d="M0,244 H30" stroke="#3465a4" stroke-width="3"/><text x="38" y="248" class="mono dim" font-size="9">Z2 → GPIO 33</text>
+    <path d="M0,260 H30" stroke="#2e8b57" stroke-width="3"/><text x="38" y="264" class="mono dim" font-size="9">Z3 → GPIO 34</text>
+    <path d="M0,276 H30" stroke="#8e44ad" stroke-width="3"/><text x="38" y="280" class="mono dim" font-size="9">Z4 → GPIO 35</text>
+    <path d="M0,292 H30" stroke="#0a9396" stroke-width="3"/><text x="38" y="296" class="mono dim" font-size="9">Z5 → GPIO 36</text>
+    <path d="M0,308 H30" stroke="#e08a2e" stroke-width="3"/><text x="38" y="312" class="mono dim" font-size="9">3.3 V</text>
+    <path d="M0,324 H30" stroke="#c0392b" stroke-width="3"/><text x="38" y="328" class="mono dim" font-size="9">5.0 V in</text>
+    <path d="M0,340 H30" stroke="#2b2f2e" stroke-width="3"/><text x="38" y="344" class="mono dim" font-size="9">GND</text>
+    <path d="M0,356 H30" stroke="#8d9491" stroke-width="3"/><text x="38" y="360" class="mono dim" font-size="9">zone loop</text>
+  </g>
+
+  <text x="24" y="690" class="mono dim" font-size="10">Mount the ESP32 on two 19-pin female header rows so it stays removable for flashing. Long runs (buses, zone jumpers) are insulated</text>
+  <text x="24" y="706" class="mono dim" font-size="10">hookup wire on the component side — plain perfboard has no tracks to cut. Solder resistor/cap leads point-to-point underneath.</text>
+  <text x="24" y="726" class="mono" font-size="10" fill="#e08a2e" font-weight="600">Pin order shown is the common 38-pin DevKitC arrangement — verify against your board's silkscreen before soldering the headers.</text>
+</svg>
