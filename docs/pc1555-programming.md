@@ -1,5 +1,10 @@
 # PC1555 / Power632 — installer programming reference
 
+> **⛔ Panel retired 2026-09-14** — its CPU does not execute firmware, so nothing here
+> can be entered anymore. Kept because the hardware-default procedure (§5.28, below)
+> is part of the diagnostic record: it was attempted twice and the panel never
+> performed it.
+
 Transcribed from the DSC PC1555 (PowerSeries, 52-page) installation manual,
 Section 6 Programming Worksheets. Section numbers are the same on the v2.x manual.
 

@@ -13,7 +13,14 @@ and if it doesn't, find out *which part* doesn't.
 
 ---
 
-> ## ⚠️ STATUS — power confirmed, communication NOT confirmed
+> ## ⛔ STATUS — CONCLUDED 2026-09-14: panel retired, CPU does not execute firmware
+>
+> Diagnosis is complete. Battery and factory default both failed with the tap verified;
+> see **"Final test session — stopping rule reached"** below for the verdict and
+> `diy-zone-reader.md` for the active replacement design. The banner below this line is
+> preserved as it stood mid-diagnosis.
+>
+> ## ⚠️ (historical) power confirmed, communication NOT confirmed
 >
 > **Stage 2 and 3 pass.** On AC only with no battery, both keypads light up. The
 > transformer and the panel's power supply work, and nothing on AUX is shorted (all
@@ -42,7 +49,8 @@ and if it doesn't, find out *which part* doesn't.
 > keypad, Keybus comms do not.
 >
 > **Next and decisive: the Stage 4 clock measurement on YEL.** It separates "power
-> supply fine, CPU dead" from "CPU running, fault downstream."
+> supply fine, CPU dead" from "CPU running, fault downstream." *(It did: 0 edges/s —
+> CPU dead. See the final test session.)*
 >
 > `Program` off also rules out programming mode; `Fire` off rules out fire trouble.
 

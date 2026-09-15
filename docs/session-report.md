@@ -3,8 +3,11 @@
 Recovering a DSC PC1555 alarm panel that sat unpowered for ~20 years, and building an
 ESP32 Keybus interface to read its state.
 
-**Status: panel supplies power but does not clock the Keybus. Blocked on a replacement
-battery.**
+**Status at the time of writing: panel supplies power but does not clock the Keybus;
+blocked on a replacement battery.** *(Since concluded — the battery and two factory
+defaults changed nothing, the CPU is dead, and the project pivoted to reading the zone
+loops directly. See `panel-bringup.md` → "Final test session" and
+`diy-zone-reader.md`.)*
 
 ---
 
