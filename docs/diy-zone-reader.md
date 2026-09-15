@@ -93,7 +93,7 @@ To buy:
 | Item | Qty | Approx | Needed when |
 |---|---|---|---|
 | 0.1 µF ceramic capacitors | 5 (+1 spare) | ~$6 assortment | Build |
-| Screw terminal blocks, perfboard mount | ~4 | ~$8 | Build |
+| Screw terminal blocks, 2-pos, 5.08 mm pitch (interlocking) | 10-pack | ~$8 | Build — 5 zones + power in + spare; 5.08 mm fits every other perfboard hole |
 | Perfboard | 1 | ~$3 if not on hand | Build |
 | Opto-isolated relay module, 5 V coil | 1 | ~$5 | Phase 2 (siren) |
 | Inline fuse holder + 1 A fuse | 1 | ~$4 | Phase 2 (siren) |
