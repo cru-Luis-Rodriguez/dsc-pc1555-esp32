@@ -1,12 +1,14 @@
 # Project context
 
-Reads zone, arming and trouble state from a **DSC PC1555 (Power632)** alarm panel over
-the Keybus using an **ESP32**, and exposes it as a serial stream and a self-hosted LAN
-web page. No cloud, no broker, no subscription.
+An **ESP32** reads the five zone loops of a retired **DSC PC1555 (Power632)** alarm
+panel directly and exposes them as a serial stream and a self-hosted LAN web page. No
+cloud, no broker, no subscription.
 
-The panel sat unpowered for ~20 years and is currently **mid-diagnosis**. Read
-`docs/panel-bringup.md` before touching anything — it is the running record of what has
-been tested and ruled out.
+The panel sat unpowered for ~20 years and its CPU turned out to be dead — diagnosis
+**concluded 2026-09-14** (`docs/panel-bringup.md` → "Final test session"). The panel
+now serves only as a battery-backed 12 V supply and junction box. The active design is
+`docs/diy-zone-reader.md` → "This installation, concretely"; the original Keybus
+interface survives as reference code and docs.
 
 ## Hardware, confirmed from photos and measurement
 
@@ -16,7 +18,7 @@ been tested and ruled out.
 | Family | PowerSeries (Keybus) — **not** Classic, so no `dscPC16Pin` |
 | Keypads | `PC5508ZT` (8-zone LED) and a Ranger American rebrand, same layout |
 | Zones in use | 5 of 8 — see zone map below |
-| Battery | Original `CA1240` 12 V 4 Ah dead at 2.4 V; replacement on order |
+| Battery | Original `CA1240` dead at 2.4 V; replacement CA1240 installed (12.9 V metered) |
 | Powered devices | **None.** AUX and PGM terminals are empty — no PIRs on this system |
 
 ### Zone map (from the keypad label card)
@@ -134,9 +136,11 @@ Close any interactive monitor before capturing — the port allows one reader.
 The script exits 1 on zero bytes, so a zero exit already implies a non-zero byte count.
 Don't check both.
 
-### A flood of output is not success
+### A flood of output is not success (Keybus reference targets)
 
-With the tap **unwired**, GPIO 18 is a floating input. It picks up ambient coupling and
+Applies to the retired `reader`/`keybus-*` envs; the zone targets print fixed-format
+lines and have no equivalent failure mode. With the tap **unwired**, GPIO 18 is a
+floating input. It picks up ambient coupling and
 the library reads the noise as bus transitions — one bare-board capture produced
 **214,552 `Keybus disconnected` lines in 20 seconds** (4.5 MB). Entirely benign, and
 nothing to do with the panel.
@@ -155,15 +159,19 @@ Judge by structure, not volume.
 
 ## Gotchas that will cost you time
 
-- **Do not bump `platform = espressif32@6.9.0`.** dscKeybusInterface does not compile
-  against arduino-esp32 3.x — the timer API changed. See upstream issue #344.
-- **ESP32-WROOM-32 only.** The library supports esp32 and esp32-s2. Many boards sold as
-  "ESP32" today are S3 or C3 and will not work.
-- **ADC2 is unusable with WiFi active** — matters only for `docs/diy-zone-reader.md`,
-  the fallback design. Use ADC1 (GPIO 32/33/34/35/36/39).
-- **Solder the Keybus tap. Never breadboard it.** Intermittent contacts cause CRC errors
-  that look exactly like a protocol fault.
-- **Never disconnect a Keybus wire with the panel powered.**
+- **ADC2 is unusable with WiFi active.** The zone reader must stay on ADC1
+  (GPIO 32/33/34/35/36/39).
+- **GPIO 36/39 glitch under WiFi power-save** — every WiFi target keeps
+  `WiFi.setSleep(false)`; zone 5 is on GPIO 36.
+- **Do not bump `platform = espressif32@6.9.0`.** dscKeybusInterface (still built by the
+  reference envs) does not compile against arduino-esp32 3.x — the timer API changed.
+  See upstream issue #344.
+- **ESP32-WROOM-32 only.** Many boards sold as "ESP32" today are S3 or C3 and will not
+  work with the pinout or the reference library.
+- **Solder, never breadboard** — intermittent contacts produced phantom faults all
+  through this project.
+- **Never disconnect field wiring with the panel powered** — still applies; the panel
+  is live as the PSU.
 - `KeybusReader` upstream is a `.ino`; `src/keybus_reader.cpp` adds `#include
   <Arduino.h>` and forward declarations so it builds as C++. Don't "fix" those.
 
@@ -171,12 +179,13 @@ Judge by structure, not volume.
 
 | File | What it covers |
 |---|---|
-| `docs/panel-bringup.md` | **Start here.** Staged diagnostics, all results, decision record |
+| `docs/diy-zone-reader.md` | **Start here — the active design.** "This installation, concretely": zone→pin map, power, perfboard layout, parts, wire landing |
+| `docs/panel-bringup.md` | The diagnostic record: staged diagnostics, all results, final test session, decision record. Historical but load-bearing |
 | `docs/multimeter-basics.md` | Procedures P1–P4, written for a beginner; meter is a Southwire 21005N (auto-ranging, two jacks) |
-| `docs/wiring.md` | Divider design, pin assignments, BOM |
-| `docs/pc1555mx-programming.md` | Installer programming sections (filename says MX; the panel is a plain PC1555, but the manual sections match) |
-| `docs/diy-zone-reader.md` | Fallback if the panel is unrecoverable — read zone loops directly, Konnected-style |
-| `docs/build-guide.html` | Illustrated permanent install |
+| `docs/wiring.md` | Retired Keybus tap design — divider math, original BOM. Reference only |
+| `docs/pc1555-programming.md` | Installer programming reference. Panel retired; kept for the default procedure record |
+| `docs/session-report.md` | Narrative session report from the bring-up era |
+| `docs/build-guide.html` | Illustrated Keybus install guide — retired with the tap |
 
 ## Working style that has been useful here
 

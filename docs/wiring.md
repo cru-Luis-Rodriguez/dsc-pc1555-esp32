@@ -1,5 +1,11 @@
 # Wiring — PC1555 Keybus to ESP32
 
+> **⛔ Retired 2026-09-14.** The panel's CPU is dead (`panel-bringup.md` → "Final test
+> session"), so there is no Keybus to tap. The active wiring is in
+> `diy-zone-reader.md` → "This installation, concretely". This doc is kept for the
+> divider math and the original BOM — the ESP32, resistor kit, perfboard and buck it
+> lists all carry forward to the zone reader.
+
 ## Corrections to the pin assignments you had
 
 Your notes listed Arduino Uno pins (clock 3, data 4, keypad 5). Two things are off:
