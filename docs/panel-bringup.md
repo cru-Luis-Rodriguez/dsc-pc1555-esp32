@@ -496,7 +496,7 @@ All ruled out with a multimeter and free tests. What remains is the panel's **in
 state** — EEPROM contents, or a startup sequence that never completes. Nothing a
 multimeter can reach. Further LED-watching will not resolve it.
 
-### ⏸ Current state — waiting on battery
+### Battery test — run 2026-09-14, negative (see results below)
 
 **Ordered:** Casil `CA1240`, 12 V 4 Ah SLA, F1 terminals — exact replacement for the
 original, chosen to eliminate fit and terminal variables from the test.
@@ -526,6 +526,64 @@ Any one of those changing means the battery was the answer.
 
 Go to the factory default (item 3 above), then the ESP32 bus decode (item 4), then the
 stopping rule below.
+
+### ⛔ Final test session — 2026-09-14 — stopping rule reached
+
+Everything above was executed. Results:
+
+**Battery test — negative.** Casil CA1240 metered **12.9 V** open-circuit before
+install. Battery first, then AC, normal config (bell off). Keypads identical to
+before: Trouble lit, Ready off, no zone LEDs, dead keys, cyclic beep.
+
+**Keybus tap verified — the 0-edge readings are real.** Three independent checks:
+
+1. *Continuity:* with the panel unpowered and internal pullups enabled, GPIO 18 and 19
+   both read solid low — the 10 k legs and the ground tie are connected (an open joint
+   floats high under pullup).
+2. *Signal path:* with the panel powered, DMM at the divider junctions read **0.8 V**
+   (GPIO 18) and **1.3 V** (GPIO 19) — matching the predicted 0.9 V / 1.4 V for YEL
+   3.95 V and GRN 6.15 V through the 0.228 divider. The 33 k legs conduct.
+3. *Pin function:* the same GPIO 18 counted 214,552 transitions when floating.
+
+**Hardware factory default (§5.28) — attempted twice, negative.** AC+battery removed,
+Z1 and PGM1 cleared, solid jumper, AC-only power-up. Zone light 1 never lit — though
+with no valid bus data reaching the keypads, that indicator is inconclusive by itself.
+The second attempt was decisive: the probe captured the entire power-up window —
+**90 seconds, 0 edges/s on both clock and data, not one edge from the moment AC was
+applied.** A defaulting panel would have to clock the bus afterward; this one never
+clocked at all.
+
+**Installer lockout ruled out as the blocker.** When lockout is set, a hardware
+default announces the refusal: the line seizure relay chatters ~10 times (a rapid
+series of clicks) right after AC is applied. **No clicks were heard at either
+power-up.** That leaves one explanation covering every observation: **the CPU does
+not execute firmware.** A processor that isn't running can't clock the Keybus, can't
+perform a factory default (the default routine is firmware), and can't send the
+keypads valid status — which is exactly the symptom set. The 13.6 V supply is fine;
+the brain is gone.
+
+**Junction voltages after all remedies:** unchanged from the original Stage 4 finding —
+YEL parked at ~3.9 V, GRN at ~6.2 V, static, zero switching.
+
+#### Decision
+
+Known-good battery **and** factory default have both failed. Per the stopping rule and
+the decision record ("Board dead → option 4"): **the PC1555 is retired as a controller.**
+No further panel diagnostics. Path forward is `diy-zone-reader.md` / Konnected-style —
+the ESP32 reads the zone loops directly. The Keybus house wiring is proven good and the
+tap parts (ESP32, resistors, buck) carry forward. The zone loops themselves were never
+measured — Stage 1b is the first prerequisite of the new design.
+
+#### Bench note: serial capture near the panel
+
+During this session the CH340 USB–serial link degraded when the rig moved from the
+desk to the panel location: two port wedges (`termios.error: (22, 'Invalid argument')`
+on open — fixed only by USB replug), one capture with 28 spurious `POWERON_RESET`
+loops, and ~200 KB bursts of fabricated bytes during the reset window while the ESP32
+TX is tristated (byte rate exceeded what 115200 baud can carry, so the noise is
+adapter-generated, not real UART data). App output after the banner was always clean.
+Judge captures by structured lines only; if the port wedges, replug USB. Suspect the
+cable/EMI environment near the panel.
 
 ### Stopping rule
 

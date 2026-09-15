@@ -32,71 +32,79 @@ been tested and ruled out.
 
 ## Current state
 
-**The panel powers up but does not clock the Keybus.**
+**PANEL RETIRED — stopping rule reached 2026-09-14.** The panel's CPU does not execute
+firmware. Full record in `docs/panel-bringup.md` → "Final test session".
 
-Measured at the panel: `RED`–`BLK` **13.6 V** (supply good), `YEL`–`BLK` **3.95 V**
-steady, `GRN`–`BLK` **6.15 V** steady. Identical at both keypads, so house wiring is
-good.
+The end-game tests, all negative:
 
-> **Those two voltages are static DC, not duty-cycle averages.** An earlier reading of
-> this project treated an intermediate DMM voltage as proof the line was switching. It
-> is not — a multimeter cannot distinguish a square wave from a parked level. The
-> `probe` target settles it: **0 edges/s on both GPIO 18 and 19** across four captures,
-> while the same GPIO 18 counted **214,552 transitions when left floating**. The pin
-> detects edges; the Keybus lines do not produce any.
+- **Battery test:** known-good CA1240 (12.9 V metered), battery-first-then-AC, normal
+  config. Keypads unchanged.
+- **Hardware factory default (§5.28, Z1↔PGM1, verified against manual):** attempted
+  twice. Second attempt captured by the `probe` target across the whole 90 s power-up
+  window — **0 edges/s on both lines, not one edge from AC-on**.
+- **Installer lockout ruled out:** lockout announces itself with ~10 line-seizure relay
+  clicks at power-up; none heard at either attempt.
+- **Tap triple-verified**, so the 0-edge readings are real: pullup continuity test
+  (both pins pull low through the 10 k legs), junction voltages under power (0.8 V /
+  1.3 V, matching predicted 0.9 V / 1.4 V through the 0.228 divider), and the same
+  GPIO 18 counted 214,552 transitions when floating.
 
-So Stage 4 ("is the CPU running?") is a **FAIL**, not the pass recorded earlier. The
-power supply works and nothing drives the bus.
+One explanation covers everything: a CPU that isn't running can't clock the bus, can't
+execute a default, and can't send the keypads valid status. Supply is fine (13.6 V);
+YEL/GRN sit parked at 3.9 V / 6.2 V static.
 
-But both keypads show **Trouble lit, Ready off, zero zone LEDs, and accept no
-keystrokes**, with a ~1 Hz beep that `[#]` will not silence. Ready off with no zone
-LEDs is internally inconsistent — no valid status is reaching them.
-
-**Ruled out:** dead board · dead transformer · bad power supply · halted CPU · dead
-clock · dead data line · house wiring · bus slot conflict · either keypad individually ·
-every field connection (tested at transformer-plus-one-keypad).
-
-**Remaining:** the panel's internal state — EEPROM contents, or a startup sequence that
-never completes.
+**Decision (per the decision record): option 4 — the ESP32 reads the zone loops
+directly.** See `docs/diy-zone-reader.md` → "This installation, concretely". The panel
+is now a battery-backed 12 V supply and junction box. No further panel diagnostics.
+Note: the zone loops themselves were never measured (Stage 1b skipped) — that
+measurement is the new design's first prerequisite.
 
 ## Physical state right now — read this before diagnosing anything
 
 | Thing | State |
 |---|---|
-| ESP32 | On the desk, **USB only**. Flashed with `reader`, verified working. |
-| **Keybus tap** | **NOT WIRED.** No resistors, no connection to the panel at all. |
-| Buck converter | Unopened. Not needed — USB powers the board for bench work. |
-| Panel | Partly disassembled from diagnostics. Bell disconnected. Second keypad and some zone wires may still be off. Power state uncertain. |
-| Battery | On order, not yet installed. |
+| ESP32 | At the panel, **USB-powered**, flashed with `probe`. |
+| **Keybus tap** | **Soldered and triple-verified** — YEL→33k/10k→GPIO 18, GRN→33k/10k→GPIO 19, BLK→GND. |
+| Buck converter | Unopened. |
+| Panel | Powered (AC + battery), normal config except **bell disconnected**. Bus dead — see Current state. |
+| Battery | CA1240 installed, metered 12.9 V before install. |
 
-> **`Keybus disconnected` and zero bytes is the CORRECT output in this state.** It is
-> the pass condition for the bare-board test — it proves board, flash, serial link and
-> library all work with nothing attached. Do not diagnose it as a fault until the tap
-> is actually wired and the panel is actually powered.
+> **Serial-link gotcha at the panel location:** the CH340 port intermittently wedges
+> (`termios.error: (22, 'Invalid argument')` on open — only a USB replug fixes it) and
+> fabricates garbage bytes during the reset window while the ESP32 TX is tristated.
+> Structured lines after the app banner are always clean — judge captures by those
+> only. Suspect cable/EMI; details in the bringup doc's bench note.
 
 ## Next actions, in order
 
-1. **Install the replacement battery when it arrives** (procedure in
-   `docs/panel-bringup.md` → "When the battery arrives"). DSC panels run a startup
-   battery test; a panel stuck mid-init would clock, transmit, beep on a cycle, and
-   never reach normal operation — which matches exactly.
-2. **`pio run -e reader -t upload -t monitor`** with the tap wired. This is the
-   diagnostic that matters: raw decoded Keybus traffic, which works even when the panel
-   is misbehaving. Look for whether it repeats one command forever, what the command
-   byte is, and whether modules are ever acknowledged.
-3. **Factory default** if the battery doesn't help — jumper Z1 to PGM1 during power-up,
-   no keypad input required. Also resets installer code to `5555`, master to `1234`,
-   which solves the unknown-code problem. Verify against manual §5.28 first.
-4. **Stopping rule:** if a good battery *and* a factory default both fail, stop. See
-   the decision record at the end of `docs/panel-bringup.md`.
+The diagnostic phase is over. The project pivots to `docs/diy-zone-reader.md`:
+
+1. **Measure the zone loops (Stage 1b)** — panel powered down, each loop at the panel
+   end, P3 @ 20 kΩ. Record closed value + open/close behaviour in the bringup doc's
+   measurement log. The design assumes 5.6 kΩ EOL; this is the unverified input.
+2. **Buy the short parts list** — see `diy-zone-reader.md` → "Parts list — this build"
+   (~$15–20: ceramics, terminal blocks, perfboard).
+3. ~~Decide firmware~~ **Decided and written**: the `serial`/`web` targets now do
+   direct ADC loop reading (`src/zones.cpp` + `zone_serial.cpp`/`zone_web.cpp`),
+   keeping the no-HA, self-hosted goal. Both compile. Verify/adjust the threshold
+   constants in `include/zones.h` once Stage 1b numbers exist.
+4. **Build per the zone→pin map**, power the ESP32 from panel AUX through the LM2596
+   (set to 5.0 V before connecting!). The Keybus tap is retired — the divider parts
+   get reused for zone dividers. Note the ESP32 currently has `probe` flashed and the
+   old Keybus tap still soldered to GPIO 18/19; remove the tap during the rebuild.
 
 ## Build targets
 
 ```
-pio run -e reader -t upload -t monitor   # RAW Keybus dump — use this while diagnosing
-pio run -e serial -t upload -t monitor   # decoded status over serial
-pio run -e web    -t upload -t monitor   # self-hosted LAN page
+pio run -e serial -t upload -t monitor   # zone status over serial (direct loop reading)
+pio run -e web    -t upload -t monitor   # self-hosted LAN page  (direct loop reading)
 ```
+
+Zone logic lives in `include/zones.h` + `src/zones.cpp` (shared by both targets);
+thresholds are constants in the header, to be verified against Stage 1b measurements.
+
+Retired Keybus targets, kept buildable for reference: `reader` (raw dump), `probe`
+(edge counter), `peak` (ADC peak), `keybus-serial`, `keybus-web`.
 
 Serial port on this Mac: `/dev/cu.usbserial-0001`, 115200 baud.
 
