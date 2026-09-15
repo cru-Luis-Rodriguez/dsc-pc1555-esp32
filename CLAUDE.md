@@ -84,20 +84,27 @@ The diagnostic phase is over. The project pivots to `docs/diy-zone-reader.md`:
    measurement log. The design assumes 5.6 kΩ EOL; this is the unverified input.
 2. **Buy the short parts list** — see `diy-zone-reader.md` → "Parts list — this build"
    (~$15–20: ceramics, terminal blocks, perfboard).
-3. **Decide firmware**: adapt the existing `serial`/`web` targets to ADC loop reading
-   (keeps the no-HA, self-hosted goal), or fork Konnected's ESPHome config (assumes
-   Home Assistant). Hardware is identical either way.
+3. ~~Decide firmware~~ **Decided and written**: the `serial`/`web` targets now do
+   direct ADC loop reading (`src/zones.cpp` + `zone_serial.cpp`/`zone_web.cpp`),
+   keeping the no-HA, self-hosted goal. Both compile. Verify/adjust the threshold
+   constants in `include/zones.h` once Stage 1b numbers exist.
 4. **Build per the zone→pin map**, power the ESP32 from panel AUX through the LM2596
-   (set to 5.0 V before connecting!). The Keybus tap and `probe`/`reader` targets are
-   retired — keep the code; the divider parts get reused.
+   (set to 5.0 V before connecting!). The Keybus tap is retired — the divider parts
+   get reused for zone dividers. Note the ESP32 currently has `probe` flashed and the
+   old Keybus tap still soldered to GPIO 18/19; remove the tap during the rebuild.
 
 ## Build targets
 
 ```
-pio run -e reader -t upload -t monitor   # RAW Keybus dump — use this while diagnosing
-pio run -e serial -t upload -t monitor   # decoded status over serial
-pio run -e web    -t upload -t monitor   # self-hosted LAN page
+pio run -e serial -t upload -t monitor   # zone status over serial (direct loop reading)
+pio run -e web    -t upload -t monitor   # self-hosted LAN page  (direct loop reading)
 ```
+
+Zone logic lives in `include/zones.h` + `src/zones.cpp` (shared by both targets);
+thresholds are constants in the header, to be verified against Stage 1b measurements.
+
+Retired Keybus targets, kept buildable for reference: `reader` (raw dump), `probe`
+(edge counter), `peak` (ADC peak), `keybus-serial`, `keybus-web`.
 
 Serial port on this Mac: `/dev/cu.usbserial-0001`, 115200 baud.
 

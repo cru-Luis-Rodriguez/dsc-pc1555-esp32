@@ -54,13 +54,13 @@ The PC1555 AUX output is rated ~550 mA; a siren pulls 0.5–1 A. If the bell is 
 reconnected, feed the relay's 12 V side **from the battery terminals through an inline
 1 A fuse**, not from AUX. The panel's own BELL output is CPU-driven and therefore dead.
 
-### Firmware decision still open
+### Firmware: decided — the repo's own targets, adapted
 
-Step 6 suggests ESPHome/Konnected, which assumes Home Assistant. This repo's stated
-goal is a serial stream + self-hosted LAN page with no broker. Both are reachable:
-ESPHome has a standalone `web_server` component (no HA required), or the existing
-`serial`/`web` targets can be adapted from dscKeybusInterface to direct ADC reads,
-keeping the codebase. Decide before wiring; the hardware is identical either way.
+The `serial` and `web` targets now read the zone loops directly (`include/zones.h`,
+`src/zones.cpp`, `src/zone_serial.cpp`, `src/zone_web.cpp`), keeping the repo's
+no-broker, no-HA, self-hosted goal. Thresholds live in `zones.h` and must be checked
+against the Stage 1b bench measurements. Step 6 below (ESPHome/Konnected) remains the
+alternative if Home Assistant enters the picture later — the hardware is identical.
 
 ### Parts list — this build
 
