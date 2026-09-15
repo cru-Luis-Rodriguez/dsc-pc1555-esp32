@@ -92,11 +92,14 @@ To buy:
 
 | Item | Qty | Approx | Needed when |
 |---|---|---|---|
-| 0.1 µF ceramic capacitors | 5 (+1 spare) | ~$6 assortment | Build |
-| Screw terminal blocks, 2-pos, 5.08 mm pitch (interlocking) | 10-pack | ~$8 | Build — 5 zones + power in + spare; 5.08 mm fits every other perfboard hole |
-| Perfboard | 1 | ~$3 if not on hand | Build |
-| Opto-isolated relay module, 5 V coil | 1 | ~$5 | Phase 2 (siren) |
-| Inline fuse holder + 1 A fuse | 1 | ~$4 | Phase 2 (siren) |
+| 0.1 µF ceramic capacitors | 5 (+1 spare) | DYWISHKEY 24-value 720 pc kit — [B07QGDGGZV](https://www.amazon.com/dp/B07QGDGGZV) | Build |
+| Screw terminal blocks, 2-pos, 5.08 mm pitch (interlocking) | 10-pack | Envistia Mall — [B07P5T3D4Q](https://www.amazon.com/dp/B07P5T3D4Q) | Build — 5 zones + power in + spare; 5.08 mm fits every other perfboard hole |
+| Perfboard | 1 | already owned — ELEGOO kit from `wiring.md` BOM | Build |
+| Opto-isolated relay module, 5 V coil | 1 | HiLetgo 2 pcs 1-channel — [B00LW15A4W](https://www.amazon.com/dp/B00LW15A4W) | Phase 2 (siren) |
+| Inline fuse holder + 1 A fuse | 1 | SIM&NAT 14 AWG 10-pack w/ fuse assortment — [B07FQCBSJ5](https://www.amazon.com/dp/B07FQCBSJ5) | Phase 2 (siren) |
+
+Picks verified on Amazon 2026-09-14; prices move — reverify at checkout, per the
+`wiring.md` convention.
 
 **Total: ~$15–20 now; ~$25 with the siren phase.** The 12 V adapter in the generic
 list below is not needed for this installation.
