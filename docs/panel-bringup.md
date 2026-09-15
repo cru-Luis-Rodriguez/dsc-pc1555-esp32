@@ -570,8 +570,9 @@ YEL parked at ~3.9 V, GRN at ~6.2 V, static, zero switching.
 Known-good battery **and** factory default have both failed. Per the stopping rule and
 the decision record ("Board dead → option 4"): **the PC1555 is retired as a controller.**
 No further panel diagnostics. Path forward is `diy-zone-reader.md` / Konnected-style —
-the ESP32 reads the zone loops directly. Zone contacts, EOL resistors, and house wiring
-are all proven good; the tap parts (ESP32, resistors, buck) carry forward.
+the ESP32 reads the zone loops directly. The Keybus house wiring is proven good and the
+tap parts (ESP32, resistors, buck) carry forward. The zone loops themselves were never
+measured — Stage 1b is the first prerequisite of the new design.
 
 #### Bench note: serial capture near the panel
 

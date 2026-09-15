@@ -54,9 +54,10 @@ execute a default, and can't send the keypads valid status. Supply is fine (13.6
 YEL/GRN sit parked at 3.9 V / 6.2 V static.
 
 **Decision (per the decision record): option 4 — the ESP32 reads the zone loops
-directly.** See `docs/diy-zone-reader.md`. Zone contacts, EOL resistors, and house
-wiring are all proven good; the panel is now at most a 12 V supply and junction box.
-No further panel diagnostics.
+directly.** See `docs/diy-zone-reader.md` → "This installation, concretely". The panel
+is now a battery-backed 12 V supply and junction box. No further panel diagnostics.
+Note: the zone loops themselves were never measured (Stage 1b skipped) — that
+measurement is the new design's first prerequisite.
 
 ## Physical state right now — read this before diagnosing anything
 
@@ -78,15 +79,17 @@ No further panel diagnostics.
 
 The diagnostic phase is over. The project pivots to `docs/diy-zone-reader.md`:
 
-1. **Design review of `docs/diy-zone-reader.md`** against what is now known: 5 active
-   zones, EOL resistor value from the Stage 1b measurements, ADC1 pins only
-   (GPIO 32/33/34/35/36/39 — ADC2 is unusable with WiFi).
-2. **Decide the power source** — the panel's 13.6 V supply + new battery can power the
-   ESP32 through the buck converter, keeping the panel as a backed-up 12 V supply.
-3. **Rewire zones to the ESP32** and adapt the `serial`/`web` targets from
-   dscKeybusInterface to direct loop reading.
-4. **The Keybus tap and `probe`/`reader` targets are retired** with the panel — keep
-   the code for reference; the divider parts get reused for zone dividers.
+1. **Measure the zone loops (Stage 1b)** — panel powered down, each loop at the panel
+   end, P3 @ 20 kΩ. Record closed value + open/close behaviour in the bringup doc's
+   measurement log. The design assumes 5.6 kΩ EOL; this is the unverified input.
+2. **Buy the short parts list** — see `diy-zone-reader.md` → "Parts list — this build"
+   (~$15–20: ceramics, terminal blocks, perfboard).
+3. **Decide firmware**: adapt the existing `serial`/`web` targets to ADC loop reading
+   (keeps the no-HA, self-hosted goal), or fork Konnected's ESPHome config (assumes
+   Home Assistant). Hardware is identical either way.
+4. **Build per the zone→pin map**, power the ESP32 from panel AUX through the LM2596
+   (set to 5.0 V before connecting!). The Keybus tap and `probe`/`reader` targets are
+   retired — keep the code; the divider parts get reused.
 
 ## Build targets
 

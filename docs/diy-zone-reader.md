@@ -1,9 +1,90 @@
 # DIY zone reader — replicating Konnected with your own ESP32
 
-**This is the fallback path.** Use it only if `panel-bringup.md` concludes the PC1555
-is dead. If the panel works, the Keybus interface is strictly better — you keep the
-keypad, arming logic, siren, entry/exit delays and battery backup, and the ESP32 reads
-along without touching anything.
+**This is now the active path.** `panel-bringup.md` concluded on 2026-09-14 that the
+PC1555's CPU does not execute firmware (see "Final test session"). The panel is retired
+as a controller and this design replaces it.
+
+---
+
+## This installation, concretely (design review 2026-09-14)
+
+The generic design below, specialized to what the bring-up actually proved:
+
+### Zone → pin map
+
+| Zone | Label (from keypad card) | GPIO | Notes |
+|---|---|---|---|
+| 1 | Front Door / Rear Door | 32 | Two contacts, one loop |
+| 2 | Master Bedroom | 33 | |
+| 3 | 2nd Floor | 34 | Input-only pin — fine |
+| 4 | Rear Windows | 35 | Input-only pin — fine |
+| 5 | Front Windows | 36 | `SENSOR_VP` — see WiFi note in step 3 |
+| — | spare | 39 | Unwired, available |
+
+**All five zones are passive contacts — this system has no PIRs** (AUX was found
+empty). The 12 V-for-motion-detectors requirement in step 4 does not apply here; skip
+the 12 V adapter entirely.
+
+### Power: the dead panel is a working battery-backed PSU
+
+The panel's supply is proven good (13.6 V) and it charges the new CA1240. Use it:
+
+```
+Panel AUX+ ──► LM2596 buck (SET TO 5.0 V FIRST) ──► ESP32 VIN
+Panel AUX− ──► buck GND ──► ESP32 GND
+```
+
+Meter AUX+ to AUX− first (expect ~13.6 V, same rail as the Keybus RED that was
+measured). ESP32 + WiFi peaks ~0.25 A at the AUX side — well inside the AUX rating.
+Result: zones and ESP32 ride through power cuts on the panel battery. (The router/HA
+box won't, unless they have their own UPS — see "What you give up".)
+
+### Unverified design input — do this first
+
+**Stage 1b (zone loop resistance) was never actually run.** The circuit below assumes
+DSC-standard 5.6 kΩ EOL resistors; nothing has confirmed that. Before buying or
+building anything: panel fully powered down, meter each loop at the panel end (P3,
+20 kΩ range), record the closed value and verify it goes `OL` (or jumps) when the
+door opens. The measurement log template in `panel-bringup.md` has a table for it.
+If loops read ~0 Ω closed, use the digital-input variant in step 2 instead.
+
+### Siren (optional, phase 2)
+
+The PC1555 AUX output is rated ~550 mA; a siren pulls 0.5–1 A. If the bell is ever
+reconnected, feed the relay's 12 V side **from the battery terminals through an inline
+1 A fuse**, not from AUX. The panel's own BELL output is CPU-driven and therefore dead.
+
+### Firmware decision still open
+
+Step 6 suggests ESPHome/Konnected, which assumes Home Assistant. This repo's stated
+goal is a serial stream + self-hosted LAN page with no broker. Both are reachable:
+ESPHome has a standalone `web_server` component (no HA required), or the existing
+`serial`/`web` targets can be adapted from dscKeybusInterface to direct ADC reads,
+keeping the codebase. Decide before wiring; the hardware is identical either way.
+
+### Parts list — this build
+
+Already owned (Keybus build + this week): ESP32-WROOM ✓ · LM2596 buck (unopened) ✓ ·
+resistor kit with 5.6 k / 15 k / 1 k ✓ · hookup wire ✓ · panel PSU + CA1240 battery ✓ ·
+the tap's 33 k/10 k resistors free up for reuse.
+
+To buy:
+
+| Item | Qty | Approx | Needed when |
+|---|---|---|---|
+| 0.1 µF ceramic capacitors | 5 (+1 spare) | ~$6 assortment | Build |
+| Screw terminal blocks, perfboard mount | ~4 | ~$8 | Build |
+| Perfboard | 1 | ~$3 if not on hand | Build |
+| Opto-isolated relay module, 5 V coil | 1 | ~$5 | Phase 2 (siren) |
+| Inline fuse holder + 1 A fuse | 1 | ~$4 | Phase 2 (siren) |
+
+**Total: ~$15–20 now; ~$25 with the siren phase.** The 12 V adapter in the generic
+list below is not needed for this installation.
+
+---
+
+**Generic design follows** — kept as written, for the math and the reasoning. Where it
+conflicts with the section above, the section above wins (it knows this house).
 
 Konnected is, at bottom, an ESP32 running ESPHome with input conditioning on the front.
 You can build the same thing from parts you're already buying.
@@ -97,6 +178,12 @@ Usable ADC1 pins on a standard ESP32-WROOM dev board:
 | 4 | 35 | Input-only — fine here |
 | 5 | 36 | Also labelled `SENSOR_VP` / `VP` |
 | 6 | 39 | Also labelled `SENSOR_VN` / `VN` |
+
+> **GPIO 36 and 39 glitch when WiFi power-save is enabled** — a known ESP32 silicon
+> erratum: brief spurious readings on exactly these two pins whenever the radio duty-
+> cycles. Zone 5 lands on GPIO 36 in this build, so disable power save: in ESPHome,
+> `wifi: power_save_mode: none`; in Arduino, `WiFi.setSleep(false);`. Filtering alone
+> (C1, or an ESPHome `median` filter) reduces but does not eliminate it.
 
 That's **exactly six analog channels for exactly six onboard zones.** No expander
 needed. (GPIO 37 and 38 are also ADC1 but are not broken out on most boards.)
