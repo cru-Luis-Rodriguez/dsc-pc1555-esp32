@@ -27,6 +27,19 @@ the 12 V adapter entirely.
 
 ![Full hookup for this install: five named zone loops, each through its own 5.6k/15k/1k/0.1µF divider stage, into GPIO 32/33/34/35/36 on ADC1; GPIO 39 spare; one common ground](img/diy-install.svg)
 
+### Where the wires land
+
+The loops move **off** the panel's `Z1–Z5`/`COM` terminals entirely — the panel keeps
+only AC, battery, and AUX+/AUX−. Its zone inputs have their own internal pull-up
+network which, even with the CPU dead, still loads the loop and would shift the divider
+voltages; a loop gets exactly one owner. Per zone: label the pair at the panel terminal
+(the position is the zone map), unscrew it, land one conductor on that zone's divider
+node at the perfboard screw terminal and the other on the perfboard ground rail. The
+house wiring never leaves the cabinet — the perfboard mounts beside the panel, and its
+ground rail ties to buck − / AUX−. Zone 1's two series contacts arrive as one pair like
+any other zone. (Panel `COM` is electrically the same node as AUX−, but land returns on
+the perfboard anyway — keep all sensing in one place.)
+
 ### Power: the dead panel is a working battery-backed PSU
 
 The panel's supply is proven good (13.6 V) and it charges the new CA1240. Use it:
