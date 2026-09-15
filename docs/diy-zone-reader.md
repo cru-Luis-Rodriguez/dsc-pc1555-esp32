@@ -27,6 +27,17 @@ the 12 V adapter entirely.
 
 ![Full hookup for this install: five named zone loops, each through its own 5.6k/15k/1k/0.1µF divider stage, into GPIO 32/33/34/35/36 on ADC1; GPIO 39 spare; one common ground](img/diy-install.svg)
 
+### Perfboard placement
+
+Component-side layout on the ELEGOO 7×9 cm board from the kit — blocks on the left
+edge, one component row per zone, ESP32 on female headers on the right so it stays
+removable for flashing:
+
+![Perfboard placement: six 2-pos terminal blocks down the left edge (five zones + 5 V in), per-zone rows of 1k + cap, 5.6k to the 3.3 V bus and 15k to the ground bus, colored jumpers to GPIO 32–36 on the ESP32 DevKit, buses tying one common ground](img/diy-perfboard-layout.svg)
+
+> Pin order shown is the common 38-pin DevKitC arrangement. **Verify against your
+> board's silkscreen before soldering the headers** — clones occasionally shuffle pins.
+
 ### Where the wires land
 
 The loops move **off** the panel's `Z1–Z5`/`COM` terminals entirely — the panel keeps
