@@ -51,6 +51,16 @@ ground rail ties to buck − / AUX−. Zone 1's two series contacts arrive as on
 any other zone. (Panel `COM` is electrically the same node as AUX−, but land returns on
 the perfboard anyway — keep all sensing in one place.)
 
+**The EOL resistors are spliced at the panel end of the loops** (confirmed by photo
+2026-09-14: axial resistors under the crimp caps on the zone pairs). **Do not remove
+them** — they are part of the loop, and the divider's three states depend on them:
+without one, a closed loop reads 0 Ω and the reader calls it a tamper forever. Land
+each resistor pigtail in the screw terminal in series, exactly as spliced today. They
+are separate from the perfboard's own divider resistors. Panel-end EOL placement also
+means the tamper state only supervises the splice-to-board stretch, not the in-wall
+run — same property as a Konnected install, fine for this design. Read the actual
+value during Stage 1b and set the `zones.h` thresholds (and the pull-up) from it.
+
 ### Power: the dead panel is a working battery-backed PSU
 
 The panel's supply is proven good (13.6 V) and it charges the new CA1240. Use it:
