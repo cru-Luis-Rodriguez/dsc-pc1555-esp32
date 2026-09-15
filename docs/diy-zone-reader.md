@@ -25,6 +25,8 @@ The generic design below, specialized to what the bring-up actually proved:
 empty). The 12 V-for-motion-detectors requirement in step 4 does not apply here; skip
 the 12 V adapter entirely.
 
+![Full hookup for this install: five named zone loops, each through its own 5.6k/15k/1k/0.1µF divider stage, into GPIO 32/33/34/35/36 on ADC1; GPIO 39 spare; one common ground](img/diy-install.svg)
+
 ### Power: the dead panel is a working battery-backed PSU
 
 The panel's supply is proven good (13.6 V) and it charges the new CA1240. Use it:
@@ -38,6 +40,11 @@ Meter AUX+ to AUX− first (expect ~13.6 V, same rail as the Keybus RED that was
 measured). ESP32 + WiFi peaks ~0.25 A at the AUX side — well inside the AUX rating.
 Result: zones and ESP32 ride through power cuts on the panel battery. (The router/HA
 box won't, unless they have their own UPS — see "What you give up".)
+
+![Power tree for this install: transformer into the retired PC1555, AUX+ 13.6 V through the LM2596 buck set to 5.0 V into the ESP32 VIN; optional phase-2 siren fed from BAT+ through a 1 A fuse to the relay COM, NO switching the siren; one common ground](img/diy-power-panel.svg)
+
+(The generic power diagram in step 4, with the 12 V adapter and PIRs, does not apply
+to this house — this one replaces it.)
 
 ### Unverified design input — do this first
 
